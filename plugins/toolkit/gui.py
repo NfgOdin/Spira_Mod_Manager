@@ -321,6 +321,21 @@ class ToolkitTab:
         # Always save configuration to migrate structure on startup
         self.save_config()
 
+    def parse_version(self, ver_str):
+        if not ver_str:
+            return (0,)
+        clean = str(ver_str).strip().lstrip("vV")
+        parts = []
+        for p in re.split(r"[.\-_]", clean):
+            digits = re.match(r"^\d+", p)
+            if digits:
+                parts.append(int(digits.group(0)))
+            else:
+                break
+        while parts and parts[-1] == 0:
+            parts.pop()
+        return tuple(parts) if parts else (0,)
+
     def check_for_tool_updates(self):
         for tid, tool in self.custom_tools.items():
             path = self.tool_paths.get(tid, "")
@@ -339,8 +354,8 @@ class ToolkitTab:
                     data = json.loads(response.read().decode())
                     latest_tag = data.get("tag_name", "")
                     
-                installed_version = self.tool_versions.get(tid, "v0.0.0")
-                if latest_tag and latest_tag != installed_version:
+                installed_version = self.tool_versions.get(tid, "0.0.0")
+                if latest_tag and self.parse_version(latest_tag) > self.parse_version(installed_version):
                     self.tool_updates_available[tid] = latest_tag
                     # Refresh UI for this tool on main thread
                     self.frame.after(0, self.update_tool_ui, tid, True)

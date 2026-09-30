@@ -51,7 +51,7 @@ import tkinter as tk
 import base64
 import ctypes
 import ctypes.wintypes
-from tkinter import ttk, filedialog, messagebox, simpledialog
+from tkinter import ttk, filedialog, messagebox, simpledialog, font as tkfont
 from tooltip import ToolTip
 from PIL import Image, ImageTk
 
@@ -169,6 +169,82 @@ CATEGORY_ALIASES = {
     "GENERAL": "General"
 }
 
+# Character Dashboard Personas configuration
+CHARACTER_PERSONAS = {
+    "None": {
+        "id": "None",
+        "name": "None (Standard Theme)",
+        "theme_ref": None,
+        "crest": "🎮",
+        "quote": "",
+        "image": ""
+    },
+    "Tidus": {
+        "id": "Tidus",
+        "name": "Tidus (Zanarkand Abes)",
+        "theme_ref": "Luca Blitzball",
+        "crest": "⚽",
+        "quote": "Listen to my story. This may be our last chance.",
+        "image": "character_tidus.png"
+    },
+    "Yuna": {
+        "id": "Yuna",
+        "name": "Yuna (High Summoner)",
+        "theme_ref": "Yuna Summoner",
+        "crest": "🌸",
+        "quote": "I will live with my sorrow. I will live my own life.",
+        "image": "character_yuna.png"
+    },
+    "Auron": {
+        "id": "Auron",
+        "name": "Auron (Legendary Guardian)",
+        "theme_ref": "Auron Crimson",
+        "crest": "🗡️",
+        "quote": "This is your story. It begins here.",
+        "image": "character_auron.png"
+    },
+    "Rikku": {
+        "id": "Rikku",
+        "name": "Rikku (Al Bhed Scavenger)",
+        "theme_ref": "Rikku Thief",
+        "crest": "🔧",
+        "quote": "Memories are nice, but that's all they are.",
+        "image": "character_rikku.png"
+    },
+    "Lulu": {
+        "id": "Lulu",
+        "name": "Lulu (Black Mage)",
+        "theme_ref": "Lulu Gothic",
+        "crest": "🧸",
+        "quote": "No matter how dark the night, morning always comes.",
+        "image": "character_lulu.png"
+    },
+    "Paine": {
+        "id": "Paine",
+        "name": "Paine (Gullwing Striker)",
+        "theme_ref": "Syndicate Rose",
+        "crest": "⚔️",
+        "quote": "Ask me no questions, I'll give you no lies.",
+        "image": "character_paine.png"
+    },
+    "Wakka": {
+        "id": "Wakka",
+        "name": "Wakka (Besaid Aurochs)",
+        "theme_ref": "Besaid Sunset",
+        "crest": "🏐",
+        "quote": "Disaster if we lose! So let's win, ya?",
+        "image": "character_wakka.png"
+    },
+    "Kimahri": {
+        "id": "Kimahri",
+        "name": "Kimahri (Ronso Warrior)",
+        "theme_ref": "Macalania Ice",
+        "crest": "❄️",
+        "quote": "Kimahri protect Yuna. Even if Kimahri die.",
+        "image": "character_kimahri.png"
+    }
+}
+
 def normalize_category(cat_str):
     if not cat_str:
         return "General"
@@ -280,6 +356,11 @@ class FFXModManagerGUI:
         
         # Load configs
         self.config = self.load_config()
+        self.ui_scale = self.config.get("ui_scale", "100%")
+        self.ui_font = self.config.get("ui_font", "Segoe UI")
+        self.active_character_persona = self.config.get("character_persona", "None")
+        self._character_backdrop_image = None
+        self._character_photo_cache = None
         
         # Load current theme based on active game mode
         active_mode = self.config.get("active_game_mode", "FFX")
@@ -465,6 +546,9 @@ class FFXModManagerGUI:
         
         # Apply the startup theme fully and load mod list
         self.apply_theme(self.current_theme_name)
+        self.apply_ui_scale_and_font(self.ui_scale, self.ui_font, save=False)
+        if self.active_character_persona != "None":
+            self.apply_character_persona(self.active_character_persona, save=False)
         self.update_profile_dropdown()
         
         # Auto-import loose files check
@@ -628,6 +712,291 @@ class FFXModManagerGUI:
                     except Exception as e:
                         self.log(f"Error re-theming plugin: {e}", "error")
         self.broadcast_event("on_theme_change", theme_name)
+        if hasattr(self, "lbl_character_backdrop"):
+            try:
+                self.lbl_character_backdrop.configure(bg=self.bg_color)
+            except Exception:
+                pass
+
+    def apply_character_persona(self, persona_id, save=True):
+        """Apply the selected character persona: theme, crest, quote, and ambient backdrop."""
+        if persona_id not in CHARACTER_PERSONAS:
+            persona_id = "None"
+            
+        self.active_character_persona = persona_id
+        if save:
+            self.config["character_persona"] = persona_id
+            self.save_config()
+            
+        persona = CHARACTER_PERSONAS[persona_id]
+        
+        # 1. Apply associated theme if present and available
+        theme_target = persona.get("theme_ref")
+        if theme_target and theme_target in self.themes:
+            if self.current_theme_name != theme_target:
+                self.apply_theme(theme_target)
+                
+        # 2. Update Sidebar Brand Logo and Crest
+        if hasattr(self, "lbl_logo") and self.lbl_logo:
+            mode_prefix = getattr(self, "active_game_mode", "FFX")
+            if persona_id != "None" and persona.get("crest"):
+                self.lbl_logo.config(text=f"🎮 {mode_prefix} • {persona['crest']} {persona_id.upper()}")
+            else:
+                self.lbl_logo.config(text=f"🎮 {mode_prefix} MODS")
+                
+        # 3. Update Ambient Persona Quote in Sidebar Footer
+        if hasattr(self, "lbl_persona_quote") and self.lbl_persona_quote:
+            quote_text = persona.get("quote", "")
+            if quote_text:
+                self.lbl_persona_quote.config(text=f'"{quote_text}"')
+                self.lbl_persona_quote.pack(side="bottom", fill="x", padx=10, pady=(0, 4))
+            else:
+                self.lbl_persona_quote.config(text="")
+                self.lbl_persona_quote.pack_forget()
+
+        # 4. Synchronize Persona Dropdown in Settings if open
+        if hasattr(self, "persona_selector") and self.persona_selector:
+            try:
+                disp_str = f"{persona['crest']}  {persona['id']}" if persona_id != "None" else "None (Standard)"
+                self.persona_selector.set(disp_str)
+            except Exception:
+                pass
+                
+        # 5. Load and display character watermark backdrop
+        self.update_character_backdrop(persona_id)
+
+    def update_character_backdrop(self, persona_id):
+        """Load, scale, and alpha-blend the ambient character backdrop image."""
+        if not hasattr(self, "lbl_character_backdrop") or not self.lbl_character_backdrop:
+            return
+
+        persona = CHARACTER_PERSONAS.get(persona_id, CHARACTER_PERSONAS["None"])
+        image_name = persona.get("image", "")
+
+        if not image_name or persona_id == "None":
+            self._character_backdrop_image = None
+            self._character_photo_cache = None
+            self.lbl_character_backdrop.config(image="")
+            return
+
+        # Resolve asset folder path (handling both dev environment and PyInstaller executable)
+        if getattr(sys, "frozen", False):
+            base_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        img_path = os.path.join(base_dir, "assets", "characters", image_name)
+        if not os.path.exists(img_path):
+            # Try lowercase / sanitized fallback
+            img_path = os.path.join(base_dir, "assets", "characters", f"character_{persona_id.lower()}.png")
+
+        if not os.path.exists(img_path):
+            self._character_backdrop_image = None
+            self._character_photo_cache = None
+            self.lbl_character_backdrop.config(image="")
+            return
+
+        try:
+            pil_img = Image.open(img_path).convert("RGBA")
+            self._character_backdrop_image = pil_img
+            self.render_character_backdrop()
+        except Exception as e:
+            self._character_backdrop_image = None
+            self._character_photo_cache = None
+            self.lbl_character_backdrop.config(image="")
+
+    def render_character_backdrop(self):
+        """Render the cached character backdrop sized proportionally to current window height with alpha fading."""
+        if not getattr(self, "_character_backdrop_image", None) or not hasattr(self, "lbl_character_backdrop"):
+            return
+
+        try:
+            container_h = self.content_container.winfo_height()
+            if container_h <= 100:
+                container_h = 550
+
+            # Target ~75% of container height for elegant non-intrusive watermark scaling
+            target_h = max(250, min(650, int(container_h * 0.78)))
+            orig_w, orig_h = self._character_backdrop_image.size
+            ratio = target_h / float(orig_h)
+            target_w = max(1, int(round(orig_w * ratio)))
+
+            resized = self._character_backdrop_image.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+            # Apply subtle ambient opacity (~22% alpha) so buttons/cards remain 100% visible
+            alpha_factor = 0.22
+            r, g, b, a = resized.split()
+            a = a.point(lambda p: int(round(p * alpha_factor)))
+            faded = Image.merge("RGBA", (r, g, b, a))
+
+            photo = ImageTk.PhotoImage(faded)
+            self._character_photo_cache = photo
+            self.lbl_character_backdrop.configure(image=photo, bg=self.bg_color)
+            self.lbl_character_backdrop.lower()
+        except Exception:
+            pass
+
+    def reposition_character_backdrop(self):
+        """Handle resize events on the content container."""
+        if getattr(self, "_character_backdrop_image", None):
+            self.render_character_backdrop()
+
+    def get_ui_font(self, base_size=9, weight="normal", slant="roman"):
+        """Return a dynamic font tuple matching the user's active font family and scale."""
+        try:
+            factor = float(str(getattr(self, "ui_scale", "100%")).replace("%", "").strip()) / 100.0
+            if factor <= 0.1:
+                factor = 1.0
+        except Exception:
+            factor = 1.0
+        family = getattr(self, "ui_font", "Segoe UI")
+        scaled_size = max(6, int(round(base_size * factor)))
+        if slant != "roman":
+            return (family, scaled_size, weight, slant)
+        elif weight != "normal":
+            return (family, scaled_size, weight)
+        return (family, scaled_size)
+
+    def update_widget_fonts(self, widget, font_name=None, factor=None):
+        """Recursively update font family and scaling for all standard Tk widgets across the application."""
+        if font_name is None:
+            font_name = getattr(self, "ui_font", "Segoe UI")
+        if factor is None:
+            try:
+                factor = float(str(getattr(self, "ui_scale", "100%")).replace("%", "").strip()) / 100.0
+                if factor <= 0.1:
+                    factor = 1.0
+            except Exception:
+                factor = 1.0
+
+        try:
+            w_class = widget.winfo_class()
+            if w_class in ("Button", "Label", "Entry", "Checkbutton", "Radiobutton", "Text", "Listbox", "Spinbox", "Message"):
+                orig = getattr(widget, "_orig_font_spec", None)
+                if orig is None:
+                    try:
+                        curr_font = widget.cget("font")
+                        if curr_font:
+                            f_obj = tkfont.Font(font=curr_font)
+                            orig = (f_obj.cget("size"), f_obj.cget("weight"), f_obj.cget("slant"))
+                            widget._orig_font_spec = orig
+                    except Exception:
+                        pass
+                if orig:
+                    base_sz, weight, slant = orig
+                    # Handle negative font size (Tk pixel-based font sizes) safely
+                    base_sz_abs = abs(base_sz)
+                    new_sz = max(6, int(round(base_sz_abs * factor)))
+                    if base_sz < 0:
+                        new_sz = -new_sz
+                    if slant != "roman":
+                        widget.configure(font=(font_name, new_sz, weight, slant))
+                    elif weight != "normal":
+                        widget.configure(font=(font_name, new_sz, weight))
+                    else:
+                        widget.configure(font=(font_name, new_sz))
+        except Exception:
+            pass
+
+        # Recurse children
+        try:
+            for child in widget.winfo_children():
+                self.update_widget_fonts(child, font_name, factor)
+        except Exception:
+            pass
+
+    def apply_ui_scale_and_font(self, scale_str=None, font_family=None, save=True):
+        """Dynamically configure standard Tk named fonts, TTK styles, and all widgets based on scale and font family."""
+        if scale_str is not None:
+            self.ui_scale = scale_str
+        if font_family is not None:
+            self.ui_font = font_family
+
+        scale_val = self.ui_scale
+        font_name = self.ui_font
+
+        # Parse scale multiplier
+        try:
+            factor = float(str(scale_val).replace("%", "").strip()) / 100.0
+            if factor <= 0.1:
+                factor = 1.0
+        except Exception:
+            factor = 1.0
+
+        # Configure standard Tkinter named fonts so all native widgets scale cleanly
+        font_mappings = {
+            "TkDefaultFont": (font_name, max(8, int(round(9 * factor)))),
+            "TkTextFont": (font_name, max(8, int(round(9 * factor)))),
+            "TkHeadingFont": (font_name, max(10, int(round(11 * factor))), "bold"),
+            "TkCaptionFont": (font_name, max(7, int(round(8 * factor)))),
+            "TkSmallCaptionFont": (font_name, max(6, int(round(7 * factor)))),
+            "TkMenuFont": (font_name, max(8, int(round(9 * factor)))),
+            "TkTooltipFont": (font_name, max(7, int(round(8 * factor)))),
+        }
+
+        for fname, fspec in font_mappings.items():
+            try:
+                f_obj = tkfont.nametofont(fname)
+                if len(fspec) == 3:
+                    f_obj.configure(family=fspec[0], size=fspec[1], weight=fspec[2])
+                else:
+                    f_obj.configure(family=fspec[0], size=fspec[1])
+            except Exception:
+                pass
+
+        # Update TTK Styles to match scale and font
+        try:
+            base_size = max(8, int(round(9 * factor)))
+            header_size = max(13, int(round(15 * factor)))
+            tab_pad_x = max(8, int(round(15 * factor)))
+            tab_pad_y = max(3, int(round(6 * factor)))
+            row_height = max(20, int(round(24 * factor)))
+
+            self.style.configure(".", font=(font_name, base_size))
+            self.style.configure("TLabel", font=(font_name, base_size))
+            self.style.configure("Header.TLabel", font=(font_name, header_size, "bold"))
+            self.style.configure("SubHeader.TLabel", font=(font_name, base_size, "italic"))
+            self.style.configure("Treeview", font=(font_name, base_size), rowheight=row_height)
+            self.style.configure("Treeview.Heading", font=(font_name, base_size, "bold"))
+            self.style.configure("TNotebook.Tab", padding=[tab_pad_x, tab_pad_y], font=(font_name, base_size, "bold"))
+            self.style.configure("TCombobox", font=(font_name, base_size))
+            self.style.configure("TEntry", font=(font_name, base_size))
+        except Exception:
+            pass
+
+        # Option Database for Combobox Popdown Listboxes
+        try:
+            self.root.option_add("*TCombobox*Listbox.font", (font_name, max(9, int(round(10 * factor)))))
+        except Exception:
+            pass
+
+        # Propagate font and scale dynamically to ALL existing widgets in the window tree
+        if hasattr(self, "root") and self.root:
+            self.update_widget_fonts(self.root, font_name, factor)
+
+        if save:
+            self.config["ui_scale"] = self.ui_scale
+            self.config["ui_font"] = self.ui_font
+            self.save_config()
+
+        # Update combobox selectors if they exist in Settings page
+        if hasattr(self, "scale_selector") and self.scale_selector:
+            try:
+                self.scale_selector.set(self.ui_scale)
+            except Exception:
+                pass
+        if hasattr(self, "font_selector") and self.font_selector:
+            try:
+                self.font_selector.set(self.ui_font)
+            except Exception:
+                pass
+
+        # Refresh lists and mod cards to apply new geometry/fonts
+        if hasattr(self, "refresh_list"):
+            try:
+                self.refresh_list()
+            except Exception:
+                pass
 
     def update_widget_colors(self, widget):
         try:
@@ -1182,6 +1551,12 @@ class FFXModManagerGUI:
                                           fg=self.text_dim, bg=self.card_color, pady=2)
         self.lbl_storage_space._is_muted = True
         self.lbl_storage_space.pack(side="bottom", fill="x", padx=10)
+
+        # Ambient Persona Quote
+        self.lbl_persona_quote = tk.Label(self.sidebar_bottom_frame, text="", font=("Segoe UI", 7, "italic"),
+                                          fg=self.text_dim, bg=self.card_color, wraplength=140, justify="center")
+        self.lbl_persona_quote._is_muted = True
+        self.lbl_persona_quote.pack(side="bottom", fill="x", padx=10, pady=(0, 4))
         
         self.sidebar_buttons_frame = tk.Frame(self.sidebar, bg=self.card_color)
         self.sidebar_buttons_frame.pack(fill="x", padx=15, pady=5)
@@ -1197,6 +1572,12 @@ class FFXModManagerGUI:
         # 2. Right Content & Workspace Panel
         self.content_container = tk.Frame(main_layout, bg=self.bg_color)
         self.content_container.pack(side="left", fill="both", expand=True)
+
+        # Ambient Character Watermark Backdrop
+        self.lbl_character_backdrop = tk.Label(self.content_container, bg=self.bg_color, bd=0)
+        self.lbl_character_backdrop.place(relx=1.0, rely=1.0, anchor="se")
+        self.lbl_character_backdrop.lower()
+        self.content_container.bind("<Configure>", lambda e: self.reposition_character_backdrop())
         
         # Update Banner Frame (Hidden by default)
         self.update_banner_frame = tk.Frame(self.content_container, bg=self.bg_color)
@@ -1292,6 +1673,16 @@ class FFXModManagerGUI:
             self.refresh_list()
             
         self.mod_search_var.trace_add("write", on_search_update)
+
+        # Quick keyboard shortcuts: Ctrl+F to focus search, Escape to clear search
+        def focus_search_entry(event=None):
+            if hasattr(self, "notebook") and self.notebook.select() == str(self.tab_mods):
+                self.ent_search.focus_set()
+                self.ent_search.selection_range(0, tk.END)
+                return "break"
+        self.root.bind("<Control-f>", focus_search_entry)
+        self.root.bind("<Control-F>", focus_search_entry)
+        self.ent_search.bind("<Escape>", lambda e: [self.clear_search(), self.cards_canvas.focus_set() if hasattr(self, "cards_canvas") else None])
 
         # Profile management row
         profile_row = ttk.Frame(left_frame, style="Card.TFrame")
@@ -1505,11 +1896,20 @@ class FFXModManagerGUI:
         self.bind_hover(btn_visit)
         ToolTip(btn_visit, "Open the mod's URL link in your web browser.", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
         
-        self.btn_save_meta = tk.Button(meta_frame, text="Save Details", command=self.save_mod_metadata, bg=self.card_color,
+        btn_action_row = tk.Frame(meta_frame, bg=self.card_color)
+        btn_action_row.grid(row=7, column=1, sticky="w", padx=5, pady=5)
+        
+        self.btn_save_meta = tk.Button(btn_action_row, text="💾 Save Details", command=self.save_mod_metadata, bg=self.card_color,
                                        fg=self.text_color, relief="flat", activebackground=self.border_color)
-        self.btn_save_meta.grid(row=7, column=1, sticky="w", padx=5, pady=5)
+        self.btn_save_meta.pack(side="left", padx=(0, 6))
         self.bind_hover(self.btn_save_meta)
         ToolTip(self.btn_save_meta, "Save modifications made to this mod's metadata fields (Enter or Ctrl+S).", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
+        
+        self.btn_export_mod_zip = tk.Button(btn_action_row, text="📦 Export Zip", command=lambda: self.export_single_mod_dialog(), bg=self.card_color,
+                                            fg=self.text_color, relief="flat", activebackground=self.border_color)
+        self.btn_export_mod_zip.pack(side="left")
+        self.bind_hover(self.btn_export_mod_zip)
+        ToolTip(self.btn_export_mod_zip, "Package and export this mod into a standalone, distribution-ready .zip archive.", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
         
         # Keyboard shortcuts for quick metadata saving
         for ent in [self.ent_mod_name, self.ent_mod_creator, self.ent_mod_version, self.ent_mod_desc, self.cmb_mod_category, self.ent_nexus_id, self.ent_mod_link]:
@@ -1578,6 +1978,7 @@ class FFXModManagerGUI:
         self.tree_files.column("size", width=80, anchor="e")
         self.tree_files.pack(fill="both", expand=True, side="left")
         self.tree_files.bind("<Button-3>", self.show_tree_files_context_menu)
+        self.tree_files.bind("<Double-Button-1>", lambda e: self.open_selected_file_location())
         
         scroll_f = ttk.Scrollbar(files_frame, command=self.tree_files.yview)
         scroll_f.pack(fill="y", side="right")
@@ -1840,14 +2241,14 @@ class FFXModManagerGUI:
         theme_card._is_card = True
         theme_card.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
         
-        lbl_theme_title = tk.Label(theme_card, text="Appearance Theme Settings", font=("Segoe UI", 10, "bold"), fg=self.accent_color, bg=self.card_color)
+        lbl_theme_title = tk.Label(theme_card, text="Appearance & Display Settings", font=("Segoe UI", 10, "bold"), fg=self.accent_color, bg=self.card_color)
         lbl_theme_title._is_title = True
         lbl_theme_title.pack(anchor="w", pady=(0, 8))
         
         theme_row = tk.Frame(theme_card, bg=self.card_color)
-        theme_row.pack(fill="x")
+        theme_row.pack(fill="x", pady=2)
         
-        lbl_select = tk.Label(theme_row, text="Theme:", bg=self.card_color, fg=self.text_color, font=("Segoe UI", 8))
+        lbl_select = tk.Label(theme_row, text="Theme:", bg=self.card_color, fg=self.text_color, font=("Segoe UI", 8), width=10, anchor="w")
         lbl_select.pack(side="left", padx=(0, 6))
         
         self.theme_selector = ttk.Combobox(theme_row, values=list(self.themes.keys()), state="readonly", width=20, font=("Segoe UI", 8))
@@ -1855,6 +2256,60 @@ class FFXModManagerGUI:
         self.theme_selector.pack(side="left", padx=(0, 6))
         self.theme_selector.bind("<<ComboboxSelected>>", lambda e: self.apply_theme(self.theme_selector.get()))
         ToolTip(self.theme_selector, "Choose from available appearance color skins.", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
+        
+        # Character Persona Selector Row
+        persona_row = tk.Frame(theme_card, bg=self.card_color)
+        persona_row.pack(fill="x", pady=2)
+        
+        lbl_persona = tk.Label(persona_row, text="Persona:", bg=self.card_color, fg=self.text_color, font=("Segoe UI", 8), width=10, anchor="w")
+        lbl_persona.pack(side="left", padx=(0, 6))
+        
+        persona_names = [f"{p['crest']}  {p['id']}" if p['id'] != "None" else "None (Standard)" for p in CHARACTER_PERSONAS.values()]
+        self.persona_selector = ttk.Combobox(persona_row, values=persona_names, state="readonly", width=20, font=("Segoe UI", 8))
+        curr_p_info = CHARACTER_PERSONAS.get(self.active_character_persona, CHARACTER_PERSONAS["None"])
+        self.persona_selector.set(f"{curr_p_info['crest']}  {curr_p_info['id']}" if curr_p_info['id'] != "None" else "None (Standard)")
+        self.persona_selector.pack(side="left", padx=(0, 6))
+        
+        def on_persona_chosen(event=None):
+            val = self.persona_selector.get()
+            selected_id = "None"
+            for pid, pdata in CHARACTER_PERSONAS.items():
+                match_str = f"{pdata['crest']}  {pdata['id']}" if pid != "None" else "None (Standard)"
+                if val == match_str:
+                    selected_id = pid
+                    break
+            self.apply_character_persona(selected_id)
+            
+        self.persona_selector.bind("<<ComboboxSelected>>", on_persona_chosen)
+        ToolTip(self.persona_selector, "Select a character persona to set bespoke theme colors, logo crest, and ambient backdrop.", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
+        
+        # Scale Selector Row
+        scale_row = tk.Frame(theme_card, bg=self.card_color)
+        scale_row.pack(fill="x", pady=2)
+        
+        lbl_scale = tk.Label(scale_row, text="UI Scale:", bg=self.card_color, fg=self.text_color, font=("Segoe UI", 8), width=10, anchor="w")
+        lbl_scale.pack(side="left", padx=(0, 6))
+        
+        scale_options = ["100%", "110%", "120%", "130%", "150%"]
+        self.scale_selector = ttk.Combobox(scale_row, values=scale_options, state="readonly", width=20, font=("Segoe UI", 8))
+        self.scale_selector.set(self.ui_scale if self.ui_scale in scale_options else "100%")
+        self.scale_selector.pack(side="left", padx=(0, 6))
+        self.scale_selector.bind("<<ComboboxSelected>>", lambda e: self.apply_ui_scale_and_font(scale_str=self.scale_selector.get()))
+        ToolTip(self.scale_selector, "Scale text and interface elements (ideal for Steam Deck and high-DPI monitors).", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
+        
+        # Font Family Row
+        font_row = tk.Frame(theme_card, bg=self.card_color)
+        font_row.pack(fill="x", pady=2)
+        
+        lbl_font = tk.Label(font_row, text="Font Family:", bg=self.card_color, fg=self.text_color, font=("Segoe UI", 8), width=10, anchor="w")
+        lbl_font.pack(side="left", padx=(0, 6))
+        
+        font_options = ["Segoe UI", "Arial", "Consolas", "Verdana", "Calibri"]
+        self.font_selector = ttk.Combobox(font_row, values=font_options, state="readonly", width=20, font=("Segoe UI", 8))
+        self.font_selector.set(self.ui_font if self.ui_font in font_options else "Segoe UI")
+        self.font_selector.pack(side="left", padx=(0, 6))
+        self.font_selector.bind("<<ComboboxSelected>>", lambda e: self.apply_ui_scale_and_font(font_family=self.font_selector.get()))
+        ToolTip(self.font_selector, "Select preferred typography across the application interface.", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
         
         btn_create_theme = tk.Button(theme_card, text="🎨 Create Custom Theme", command=self.open_theme_creator, bg=self.bg_color,
                                      fg=self.text_color, font=("Segoe UI", 8), relief="flat", activebackground=self.border_color, padx=10, pady=3)
@@ -2412,14 +2867,14 @@ class FFXModManagerGUI:
         top_row.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=2)
         top_row.columnconfigure(0, weight=1)
         
-        lbl_name = tk.Label(top_row, text=info["name"], font=("Segoe UI", 10, "bold"), fg=self.text_color, bg=self.card_color, anchor="w")
+        lbl_name = tk.Label(top_row, text=info["name"], font=self.get_ui_font(10, "bold"), fg=self.text_color, bg=self.card_color, anchor="w")
         lbl_name.grid(row=0, column=0, sticky="w")
         
         status = info["status"]
         status_bg = "#064e3b" if status == "Enabled" else "#374151"
         status_fg = "#10b981" if status == "Enabled" else self.text_dim
         status_text = "● Active" if status == "Enabled" else "○ Disabled"
-        lbl_status = tk.Label(top_row, text=f" {status_text} ", font=("Segoe UI", 8, "bold"), fg=status_fg, bg=status_bg, padx=6, pady=2)
+        lbl_status = tk.Label(top_row, text=f" {status_text} ", font=self.get_ui_font(8, "bold"), fg=status_fg, bg=status_bg, padx=6, pady=2)
         lbl_status._is_status_pill = True
         lbl_status.grid(row=0, column=1, sticky="e")
         
@@ -2450,19 +2905,19 @@ class FFXModManagerGUI:
         }
         bg_c, fg_c = cat_colors.get(category, ("#374151", self.text_dim))
         
-        lbl_cat = tk.Label(middle_row, text=f" {category_norm} ", font=("Segoe UI", 7, "bold"), fg=fg_c, bg=bg_c, padx=4, pady=1)
+        lbl_cat = tk.Label(middle_row, text=f" {category_norm} ", font=self.get_ui_font(7, "bold"), fg=fg_c, bg=bg_c, padx=4, pady=1)
         lbl_cat._is_status_pill = True
         lbl_cat.pack(side="left", padx=(0, 5))
         
         info_text = f"Files: {len(info['files'])}  |  Size: {self.get_friendly_size(info['size'])}"
-        lbl_info = tk.Label(middle_row, text=info_text, font=("Segoe UI", 8), fg=self.text_dim, bg=self.card_color, anchor="w")
+        lbl_info = tk.Label(middle_row, text=info_text, font=self.get_ui_font(8), fg=self.text_dim, bg=self.card_color, anchor="w")
         lbl_info._is_muted = True
         lbl_info.pack(side="left")
         
         # Check if update info exists for this mod
         update_ver = self.mod_updates.get(mod_id)
         if update_ver:
-            lbl_update = tk.Label(middle_row, text=f"✨ Update: v{update_ver}", font=("Segoe UI", 8, "bold"), fg=self.accent_color, bg=self.card_color, cursor="hand2")
+            lbl_update = tk.Label(middle_row, text=f"✨ Update: v{update_ver}", font=self.get_ui_font(8, "bold"), fg=self.accent_color, bg=self.card_color, cursor="hand2")
             lbl_update.pack(side="right")
             lbl_update.bind("<Button-1>", lambda e, url=info.get("link", ""): webbrowser.open(url) if url else webbrowser.open(f"https://www.nexusmods.com/finalfantasyxx2hdremaster/mods/{info.get('nexus_id')}"))
             ToolTip(lbl_update, "New version available! Click to download.", get_theme_colors=lambda: self.themes.get(self.current_theme_name))
@@ -2504,6 +2959,8 @@ class FFXModManagerGUI:
             menu.add_command(label="✨ Check Update", command=lambda: self.check_single_mod_update(m_id, inf))
             if inf.get("link") or inf.get("nexus_id"):
                 menu.add_command(label="🌐 Visit Nexus Page", command=lambda: webbrowser.open(inf.get("link") if inf.get("link") else f"https://www.nexusmods.com/finalfantasyxx2hdremaster/mods/{inf.get('nexus_id')}"))
+            menu.add_separator()
+            menu.add_command(label="📦 Export as Mod Archive (.zip)...", command=lambda: self.export_single_mod_dialog(m_id))
             menu.add_separator()
             status_act = "⏪ Disable Mod" if inf.get("status") == "Enabled" else "⚡ Enable Mod"
             status_cmd = self.disable_mod if inf.get("status") == "Enabled" else self.enable_mod
@@ -2555,18 +3012,40 @@ class FFXModManagerGUI:
         lbl_cat.bind("<Enter>", on_enter, add="+")
         lbl_cat.bind("<Leave>", on_leave, add="+")
 
+        # Propagate mousewheel scrolling on card and inner widgets to cards_canvas
+        def _scroll_cards_canvas(event):
+            if hasattr(self, "cards_canvas"):
+                self.cards_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        for w in [card, top_row, middle_row, lbl_name, lbl_status, lbl_info, lbl_cat]:
+            w.bind("<MouseWheel>", _scroll_cards_canvas, add="+")
+
+    def get_mod_source_dir(self, mod_id=None):
+        if not mod_id:
+            mod_id = getattr(self, "selected_mod_id", None)
+        if not mod_id:
+            return ""
+        # Check disabled repository first
+        repo_dir = os.path.join(self.mods_disabled_dir, mod_id)
+        if os.path.exists(repo_dir):
+            return repo_dir
+        # Check Fahrenheit mods folder
+        if getattr(self, "is_fahrenheit_mode", False) and self.game_dir:
+            fh_path = os.path.join(self.game_dir, "fahrenheit", "mods", mod_id)
+            if os.path.exists(fh_path):
+                return fh_path
+        # Check active mods directory
+        active_dir = self.get_active_files_dir(mod_id)
+        if active_dir and os.path.exists(active_dir):
+            return active_dir
+        return repo_dir
+
     def open_mod_folder(self, mod_id=None):
         if not mod_id:
             mod_id = getattr(self, "selected_mod_id", None)
         if not mod_id:
             return
             
-        target_dir = os.path.join(self.mods_disabled_dir, mod_id)
-        if getattr(self, "is_fahrenheit_mode", False):
-            fh_path = os.path.join(self.game_dir, "fahrenheit", "mods", mod_id)
-            if os.path.exists(fh_path):
-                target_dir = fh_path
-                
+        target_dir = self.get_mod_source_dir(mod_id)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir, exist_ok=True)
             
@@ -2712,10 +3191,10 @@ class FFXModManagerGUI:
         self.current_preview_images = []
         self.lbl_preview_img.config(image="", text="No preview available")
         
-        # Always scan the mod files inside the local mod repository directory
-        mod_dir = os.path.join(self.mods_disabled_dir, mod_id)
+        # Locate the mod directory (disabled repository, Fahrenheit folder, or active folder)
+        mod_dir = self.get_mod_source_dir(mod_id)
             
-        if not os.path.exists(mod_dir):
+        if not mod_dir or not os.path.exists(mod_dir):
             self.preview_select_row.pack_forget()
             return
             
@@ -2830,8 +3309,7 @@ class FFXModManagerGUI:
         if not hasattr(self, "selected_mod_id") or not self.selected_mod_id:
             return
             
-        # Always load from the local mod repository directory
-        mod_dir = os.path.join(self.mods_disabled_dir, self.selected_mod_id)
+        mod_dir = self.get_mod_source_dir(self.selected_mod_id)
             
         selected_rel = self.cmb_preview_file.get()
         if selected_rel:
@@ -2856,7 +3334,7 @@ class FFXModManagerGUI:
         if hasattr(self, "lbl_preview_count"):
             self.lbl_preview_count.config(text=f"{new_idx + 1} / {len(images)}")
         if hasattr(self, "selected_mod_id") and self.selected_mod_id:
-            mod_dir = os.path.join(self.mods_disabled_dir, self.selected_mod_id)
+            mod_dir = self.get_mod_source_dir(self.selected_mod_id)
             self.display_preview_image(mod_dir, images[new_idx])
 
     def on_preview_click(self, event):
@@ -2898,7 +3376,7 @@ class FFXModManagerGUI:
     def open_fullscreen_preview(self):
         if not getattr(self, "selected_mod_id", None):
             return
-        mod_dir = os.path.join(self.mods_disabled_dir, self.selected_mod_id)
+        mod_dir = self.get_mod_source_dir(self.selected_mod_id)
         selected_rel = self.cmb_preview_file.get() if hasattr(self, "cmb_preview_file") else None
         if not selected_rel and getattr(self, "current_preview_images", []):
             selected_rel = self.current_preview_images[0]
@@ -2959,6 +3437,48 @@ class FFXModManagerGUI:
         except Exception:
             pass
 
+    def open_selected_file_location(self):
+        item = self.tree_files.focus()
+        if not item:
+            sel = self.tree_files.selection()
+            if sel:
+                item = sel[0]
+        if not item:
+            return
+        values = self.tree_files.item(item, "values")
+        if not values:
+            return
+        rel_path = values[0]
+        if str(rel_path).startswith("... and"):
+            return
+        if not hasattr(self, "selected_mod_id") or not self.selected_mod_id:
+            return
+            
+        mod_status = self.get_mod_status(self.selected_mod_id)
+        mod_repo_path = os.path.join(self.mods_disabled_dir, self.selected_mod_id)
+        active_dir = self.get_active_files_dir(self.selected_mod_id)
+        target_dir = mod_repo_path if mod_status == "Disabled" else active_dir
+        abs_target = os.path.join(target_dir, rel_path)
+        
+        # If not present in target_dir, check alternative repo/source dir
+        if not os.path.exists(abs_target):
+            alt_dir = self.get_mod_source_dir(self.selected_mod_id)
+            if alt_dir and os.path.exists(os.path.join(alt_dir, rel_path)):
+                abs_target = os.path.join(alt_dir, rel_path)
+                
+        if os.path.exists(abs_target):
+            try:
+                if sys.platform == "win32":
+                    subprocess.Popen(f'explorer /select,"{os.path.normpath(abs_target)}"')
+                elif sys.platform == "darwin":
+                    subprocess.Popen(["open", "-R", abs_target])
+                else:
+                    subprocess.Popen(["xdg-open", os.path.dirname(abs_target)])
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to reveal file in explorer:\n{e}")
+        else:
+            self.open_folder()
+
     def show_tree_files_context_menu(self, event):
         item = self.tree_files.identify_row(event.y)
         if not item:
@@ -2972,8 +3492,9 @@ class FFXModManagerGUI:
             return
             
         menu = tk.Menu(self.root, tearoff=0, bg=self.card_color, fg=self.text_color, activebackground=self.accent_color, activeforeground="white")
+        menu.add_command(label="🔍 Reveal in File Explorer", command=self.open_selected_file_location)
         menu.add_command(label="📋 Copy Relative Path", command=lambda: self.copy_to_clipboard(rel_path))
-        menu.add_command(label="📁 Open Folder Location", command=self.open_folder)
+        menu.add_command(label="📁 Open Mod Folder", command=self.open_folder)
         menu.post(event.x_root, event.y_root)
 
     def show_tree_conflicts_context_menu(self, event):
@@ -5150,6 +5671,262 @@ class FFXModManagerGUI:
                 
         threading.Thread(target=worker, daemon=True).start()
 
+    def export_single_mod_dialog(self, mod_id=None):
+        if not mod_id:
+            mod_id = getattr(self, "selected_mod_id", None)
+        if not mod_id:
+            messagebox.showwarning("No Mod Selected", "Please select a mod to export.")
+            return
+
+        source_dir = self.get_mod_source_dir(mod_id)
+        if not source_dir or not os.path.exists(source_dir):
+            messagebox.showerror("Error", f"Could not locate files for mod '{mod_id}'.")
+            return
+
+        # Fetch metadata
+        info = self.mods.get(mod_id, {})
+        mod_name = info.get("name", mod_id)
+        mod_creator = info.get("creator", info.get("author", "Unknown"))
+        mod_version = info.get("version", "1.0.0")
+        mod_category = info.get("category", "General")
+        mod_desc = info.get("description", "")
+        mod_nexus = info.get("nexus_id", "")
+        mod_link = info.get("link", "")
+
+        win = tk.Toplevel(self.root)
+        win.title(f"Export Mod: {mod_name}")
+        self.set_window_icon(win)
+        win.geometry("520x460")
+        win.configure(bg=self.bg_color)
+        win.transient(self.root)
+        win.grab_set()
+
+        header = tk.Frame(win, bg=self.card_color, padx=15, pady=12)
+        header.pack(fill="x")
+        lbl_h = tk.Label(header, text="📦 Export Standalone Mod Archive (.zip)", font=("Segoe UI", 11, "bold"), fg=self.accent_color, bg=self.card_color)
+        lbl_h._is_title = True
+        lbl_h.pack(anchor="w")
+        lbl_sub = tk.Label(header, text="Package this mod into a standardized, distribution-ready zip file for Nexus Mods or sharing.", font=("Segoe UI", 8), fg=self.text_dim, bg=self.card_color)
+        lbl_sub.pack(anchor="w", pady=(2, 0))
+
+        content = tk.Frame(win, bg=self.bg_color, padx=15, pady=10)
+        content.pack(fill="both", expand=True)
+
+        meta_grid = ttk.Frame(content, style="Card.TFrame")
+        meta_grid.pack(fill="x", pady=(0, 10))
+
+        # Mod Name
+        ttk.Label(meta_grid, text="Mod Name:").grid(row=0, column=0, sticky="w", pady=3)
+        ent_name = ttk.Entry(meta_grid, width=38)
+        ent_name.grid(row=0, column=1, sticky="ew", padx=5, pady=3)
+        ent_name.insert(0, mod_name)
+
+        # Author
+        ttk.Label(meta_grid, text="Author:").grid(row=1, column=0, sticky="w", pady=3)
+        ent_author = ttk.Entry(meta_grid, width=38)
+        ent_author.grid(row=1, column=1, sticky="ew", padx=5, pady=3)
+        ent_author.insert(0, mod_creator)
+
+        # Version
+        ttk.Label(meta_grid, text="Version:").grid(row=2, column=0, sticky="w", pady=3)
+        ent_ver = ttk.Entry(meta_grid, width=38)
+        ent_ver.grid(row=2, column=1, sticky="ew", padx=5, pady=3)
+        ent_ver.insert(0, mod_version)
+
+        # Category
+        ttk.Label(meta_grid, text="Category:").grid(row=3, column=0, sticky="w", pady=3)
+        cmb_cat = ttk.Combobox(meta_grid, values=DEFAULT_CATEGORIES, state="readonly", width=36)
+        cmb_cat.grid(row=3, column=1, sticky="ew", padx=5, pady=3)
+        cmb_cat.set(mod_category if mod_category in DEFAULT_CATEGORIES else "General")
+
+        # Nexus ID
+        ttk.Label(meta_grid, text="Nexus ID:").grid(row=4, column=0, sticky="w", pady=3)
+        ent_nexus = ttk.Entry(meta_grid, width=38)
+        ent_nexus.grid(row=4, column=1, sticky="ew", padx=5, pady=3)
+        ent_nexus.insert(0, mod_nexus)
+
+        # Description
+        ttk.Label(meta_grid, text="Description:").grid(row=5, column=0, sticky="nw", pady=3)
+        txt_desc = tk.Text(meta_grid, height=4, width=38, font=("Segoe UI", 9), bg=self.card_color, fg=self.text_color, highlightbackground=self.border_color, highlightthickness=1)
+        txt_desc.grid(row=5, column=1, sticky="ew", padx=5, pady=3)
+        txt_desc.insert("1.0", mod_desc)
+
+        # Options Card
+        opt_card = tk.Frame(content, bg=self.card_color, padx=10, pady=8, highlightthickness=1, highlightbackground=self.border_color)
+        opt_card._is_card = True
+        opt_card.pack(fill="x", pady=(0, 10))
+
+        include_preview_var = tk.BooleanVar(value=True)
+        chk_preview = tk.Checkbutton(opt_card, text="Include cover / screenshot image in archive root (e.g. preview.png)",
+                                     variable=include_preview_var, bg=self.card_color, fg=self.text_color,
+                                     selectcolor=self.card_color, activebackground=self.card_color, activeforeground=self.text_color)
+        chk_preview.pack(anchor="w", pady=2)
+
+        unlock_credits_var = tk.BooleanVar(value=True)
+        chk_unlock = tk.Checkbutton(opt_card, text="Allow recipients to edit mod metadata (credits_locked = false)",
+                                    variable=unlock_credits_var, bg=self.card_color, fg=self.text_color,
+                                    selectcolor=self.card_color, activebackground=self.card_color, activeforeground=self.text_color)
+        chk_unlock.pack(anchor="w", pady=2)
+
+        # Actions Row
+        act_row = tk.Frame(win, bg=self.card_color, padx=15, pady=10)
+        act_row.pack(fill="x", side="bottom")
+
+        def run_single_export():
+            clean_name = re.sub(r'[^a-zA-Z0-9_\- ]', '_', ent_name.get().strip() or mod_id).strip()
+            clean_ver = re.sub(r'[^a-zA-Z0-9_\.]', '', ent_ver.get().strip() or "1.0.0")
+            default_zip_name = f"{clean_name}_v{clean_ver}.zip".replace(" ", "_")
+
+            save_path = filedialog.asksaveasfilename(
+                title="Save Exported Mod Archive",
+                initialfile=default_zip_name,
+                defaultextension=".zip",
+                filetypes=[("Zip Archive", "*.zip"), ("All Files", "*.*")]
+            )
+            if not save_path:
+                return
+
+            export_meta = {
+                "name": ent_name.get().strip() or mod_name,
+                "author": ent_author.get().strip() or mod_creator,
+                "creator": ent_author.get().strip() or mod_creator,
+                "version": ent_ver.get().strip() or mod_version,
+                "category": cmb_cat.get(),
+                "description": txt_desc.get("1.0", "end").strip(),
+                "nexus_id": ent_nexus.get().strip(),
+                "link": mod_link,
+                "credits_locked": not unlock_credits_var.get()
+            }
+
+            win.withdraw()
+            self.execute_single_mod_export(
+                mod_id=mod_id,
+                source_dir=source_dir,
+                save_path=save_path,
+                export_meta=export_meta,
+                include_preview=include_preview_var.get(),
+                parent_win=win
+            )
+
+        btn_run = tk.Button(act_row, text="📦 Export Standalone Zip", command=run_single_export, bg=self.accent_color,
+                            fg="#ffffff", font=("Segoe UI", 9, "bold"), relief="flat", activebackground=self.accent_hover, padx=15, pady=5)
+        btn_run._is_primary = True
+        btn_run.pack(side="right", padx=(5, 0))
+        self.bind_hover(btn_run, is_primary=True)
+
+        btn_cancel = tk.Button(act_row, text="Cancel", command=win.destroy, bg=self.card_color, fg=self.text_color,
+                               font=("Segoe UI", 9), relief="flat", activebackground=self.border_color, padx=10, pady=5)
+        btn_cancel.pack(side="right")
+        self.bind_hover(btn_cancel)
+
+    def execute_single_mod_export(self, mod_id, source_dir, save_path, export_meta, include_preview=True, parent_win=None):
+        import zipfile
+        import threading
+
+        prog_win = tk.Toplevel(self.root)
+        prog_win.title(f"Packaging {export_meta.get('name', mod_id)}...")
+        self.set_window_icon(prog_win)
+        prog_win.geometry("450x160")
+        prog_win.configure(bg=self.bg_color)
+        prog_win.transient(self.root)
+        prog_win.grab_set()
+
+        lbl_msg = tk.Label(prog_win, text=f"Creating {os.path.basename(save_path)}...", font=("Segoe UI", 10), fg=self.text_color, bg=self.bg_color)
+        lbl_msg.pack(pady=(15, 5), padx=20, anchor="w")
+
+        progress = ttk.Progressbar(prog_win, orient="horizontal", mode="determinate", length=400)
+        progress.pack(pady=5, padx=20, fill="x")
+
+        lbl_pct = tk.Label(prog_win, text="0%", font=("Segoe UI", 9, "bold"), fg=self.accent_color, bg=self.bg_color)
+        lbl_pct.pack(pady=5, padx=20, anchor="e")
+        self.root.update()
+
+        def worker():
+            try:
+                # Gather files to package relative to source_dir
+                file_tuples = []
+                best_preview_path = None
+
+                for root_d, _, files in os.walk(source_dir):
+                    for f in files:
+                        abs_f = os.path.join(root_d, f)
+                        rel_f = os.path.relpath(abs_f, source_dir).replace("\\", "/")
+
+                        # Don't duplicate old manifests inside the zip payload
+                        if f.lower() in ["modinfo.spiramod", "modinfo.ffxmod", "modinfo.json"]:
+                            continue
+
+                        # Check for preview images
+                        if is_preview_image_filename(f) and not best_preview_path:
+                            best_preview_path = abs_f
+
+                        file_tuples.append((abs_f, rel_f))
+
+                # Update files manifest list with clean relative paths
+                export_meta["files"] = [rel for (_, rel) in file_tuples if not is_preview_image_filename(os.path.basename(rel))]
+                manifest_data = encode_metadata(export_meta)
+
+                total_items = len(file_tuples) + 2
+
+                with zipfile.ZipFile(save_path, "w", zipfile.ZIP_DEFLATED) as z:
+                    # Write manifest
+                    z.writestr("modinfo.spiramod", manifest_data)
+
+                    # Write files
+                    for idx, (abs_f, rel_f) in enumerate(file_tuples):
+                        z.write(abs_f, rel_f)
+                        pct = int((idx + 1) / total_items * 100)
+                        self.root.after(0, lambda p=pct, fn=rel_f: [
+                            lbl_msg.config(text=f"Adding: {os.path.basename(fn)}"),
+                            lbl_pct.config(text=f"{p}%"),
+                            progress.configure(value=p)
+                        ])
+
+                    # Include preview at archive root if requested and available
+                    if include_preview and best_preview_path and os.path.exists(best_preview_path):
+                        preview_ext = os.path.splitext(best_preview_path)[1].lower()
+                        z.write(best_preview_path, f"preview{preview_ext}")
+
+                final_size = os.path.getsize(save_path)
+                size_str = self.get_friendly_size(final_size)
+                self.log(f"Exported Mod '{export_meta.get('name', mod_id)}' ({size_str}) to {save_path}", "success")
+
+                def on_done():
+                    prog_win.destroy()
+                    if parent_win and parent_win.winfo_exists():
+                        parent_win.destroy()
+
+                    # Completion confirmation dialog with 1-click Open Folder option
+                    if messagebox.askyesno(
+                        "Export Complete",
+                        f"Standalone mod archive successfully created!\n\n"
+                        f"• Mod: {export_meta.get('name', mod_id)}\n"
+                        f"• Version: {export_meta.get('version', '1.0.0')}\n"
+                        f"• Size: {size_str}\n\n"
+                        f"Saved to:\n{save_path}\n\n"
+                        f"Would you like to open the folder containing this archive?"
+                    ):
+                        try:
+                            if sys.platform == "win32":
+                                subprocess.Popen(f'explorer /select,"{os.path.normpath(save_path)}"')
+                            elif sys.platform == "darwin":
+                                subprocess.Popen(["open", "-R", save_path])
+                            else:
+                                subprocess.Popen(["xdg-open", os.path.dirname(save_path)])
+                        except Exception:
+                            pass
+
+                self.root.after(0, on_done)
+            except Exception as e:
+                def on_err():
+                    prog_win.destroy()
+                    if parent_win and parent_win.winfo_exists():
+                        parent_win.deiconify()
+                    messagebox.showerror("Export Failed", f"Failed to export mod archive:\n{e}")
+                self.root.after(0, on_err)
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def import_modpack_from_dir(self, temp_dir, source_archive, progress_win=None):
         import shutil
         import re
@@ -5266,11 +6043,12 @@ class FFXModManagerGUI:
             try:
                 prof_name = re.sub(r'[^a-zA-Z0-9_-]', '_', pack_name)
                 saved_mods = [os.path.basename(md) for md in found_mod_dirs]
-                self.profiles[prof_name] = saved_mods
-                self.save_profiles_data()
+                if "profiles" not in self.config:
+                    self.config["profiles"] = {}
+                self.config["profiles"][prof_name] = saved_mods
+                self.save_config()
+                self.update_profile_dropdown()
                 if hasattr(self, "profile_combobox"):
-                    vals = list(self.profiles.keys())
-                    self.profile_combobox["values"] = vals
                     self.profile_combobox.set(prof_name)
             except Exception:
                 pass

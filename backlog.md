@@ -6,34 +6,24 @@ This file serves as the long-term memory for tracking feature ideas, polishes, a
 
 ## 🖥️ Main App Backlog (Proposed)
 
-### 1. Advanced Conflict Resolution Matrix (Proposed)
-* **Goal**: Provide visual control over overlapping file conflicts.
+### 1. Mod Integrity & Missing Files Validator ("Spira Health Doctor") (Proposed)
+* **Goal**: Audit installed and active mods for 0-byte corrupt files, missing assets, and broken staging links.
 * **Details**:
-  * Show a clean list/tree-view of colliding file paths across active mods.
-  * Allow users to select which mod's version "wins" the priority override per file.
+  * One-click scan comparing on-disk mod assets against manifests (`modinfo.spiramod`).
+  * Non-destructive 1-click auto-repair actions (re-indexing manifests, resyncing staging).
 
-### 2. One-Click Nexus Mod Download Integration (`nxm://` protocol) (Proposed)
-* **Goal**: Register the mod manager with the OS to handle Nexus link downloads.
+### 2. Upgraded Safe Reset & Vanilla Baseline Verifier (Proposed)
+* **Goal**: Enhance existing Safe Reset into an instant, complete stock restoration tool.
 * **Details**:
-  * Command-line argument handler to download files directly via Nexus API and install them immediately.
+  * Automatic pre-reset profile snapshot for 1-click undo.
+  * Sweep loose untracked injection files from `data/mods/`, `UnX_Res/`, and `efl/`.
+  * Verify stock game executable and `.vbf` integrity.
 
-### 3. Interactive Character Dashboard Profiles (Proposed)
-* **Goal**: Personalize the manager with FFX/FFX-2 character styles.
-* **Details**: Switch themes based on standard profiles (Tidus, Yuna, Rikku, Auron) and automatically shift the active color schemes, ambient artwork, and background details to match.
+### 3. Quick-Tagging & Favorites System (Proposed)
+* **Goal**: Pin favorite mods and filter by custom tags.
+* **Details**: Star (★) favorite mods to keep them at the top of the mod list and filter by author/user tags (*Favorites*, *Audio*, *NSFW*, *Testing*).
 
-### 4. Drag-and-Drop FMOD Music Injector (Proposed)
-* **Goal**: Customize soundtracks easily.
-* **Details**: Convert MP3/WAV files to FMOD bank formats to swap audio files or combine original/arrange tracks.
-
-### 5. Mod Presets and Modpack Bundling (Proposed)
-* **Goal**: Share and download custom configurations.
-* **Details**: Export active mod directories as single `.ffxpreset` files that automatically download and align dependencies.
-
-### 6. Nexus Mod Update Checker (Proposed)
-* **Goal**: Verify if installed mods have newer files available.
-* **Details**: Query the Nexus Mods API using metadata IDs to cross-reference versions and display dynamic update notification badges.
-
-### 7. Fahrenheit Integration & Manifest Editor (Proposed)
+### 4. Fahrenheit Integration & Manifest Editor (Proposed)
 * **Goal**: Fully support advanced Fahrenheit manifest customization.
 * **Details**: 
   * Visual manifest editor interface to configure priorities, dependencies (`LoadAfter`), and custom configuration option parameters.
@@ -58,3 +48,8 @@ This file serves as the long-term memory for tracking feature ideas, polishes, a
 * [x] **Integrated External Tools Quick-Launcher (Plugin Toolkit)**: configures and quick-launches FFX modding utilities dynamically via the Plugin Toolkit Actions card (Next_Release).
 * [x] **Local Cloud Save Auto-Sync**: automatically backs up FFX/FFX-2 saves to Google Drive/OneDrive on game exit (Next_Release).
 * [x] **Live Graphic Mod Asset Previewer**: parse and view texture images inside mod packages in a side panel.
+* [x] **Spira Modpack Engine & Bundler (`.spirapack` / `.zip`)**: 1-click export and import of entire multi-mod collections with checklists, progress modals, and automated profile generation (Next_Release).
+* [x] **Nexus Mod Update Checker**: query Nexus Mods API to cross-reference versions and display dynamic card update notification badges (Next_Release).
+* [x] **Single Mod Standalone Zip Exporter**: 1-click packaging from card context menu or details panel into clean, distribution-ready archives with normalized relative paths, cover art, and metadata (Next_Release).
+* [x] **Custom Font & UI Scale Accessibility Switcher (Adaptive Display Engine)**: real-time font family selection and UI scale adjustment (100% - 150%) with dynamic widget geometry, Treeview row heights, and persistent accessibility preferences (Next_Release).
+* [x] **Interactive Character Dashboard Profiles & Ambient Backdrop Engine**: customized character personas (Tidus, Yuna, Auron, Rikku, Lulu, Paine, Wakka, Kimahri) coordinating color palettes, crest emblems, ambient quotes, and anchored semi-transparent character watermarks from `assets/characters/` (Next_Release).

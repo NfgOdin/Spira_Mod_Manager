@@ -15,7 +15,9 @@ This document contains a running log of all changes made since the official rele
 *   **Instant Startup & Rescan Disk Sizing**: Replaced redundant disk stat loops in `scan_mods` with direct manifest metadata size lookups, reducing app startup and list refresh time from several seconds down to under 100 milliseconds.
 *   **Large Mod Performance & Instant Conflict Engine**: Rebuilt the conflict detection engine to use an in-memory hash map index (`get_active_files_index`), eliminating tens of thousands of redundant disk reads and reducing selection latency on multi-gigabyte/10,000+ file mods from 15+ seconds down to under 2 milliseconds!
 *   **Mod List "Sort By" Engine**: Added 1-click sorting for *Name (A–Z / Z–A)*, *Status (Enabled First)*, *Size (Largest First)*, *Category*, and *Default Order*.
-*   **Quality of Life Polish**: Added quick-clear search button (`✕`), double-click mod card toggle, keyboard navigation (`▲`/`▼`), keyboard metadata shortcuts (`Ctrl+S`/`Enter`), "✔️ Saved!" visual flash, dynamic list counter, and 1-click "Open Folder" in Save Manager.
+*   **Interactive Character Dashboard Profiles & Ambient Backdrop Engine**: Coordinate bespoke character presets (Tidus, Yuna, Auron, Rikku, Lulu, Paine, Wakka, Kimahri) bundling matched color schemes, brand logo crests, ambient quotes, and anchored semi-transparent character watermarks loaded from `assets/characters/`.
+*   **Adaptive Display Engine & UI Scaling**: Real-time font family picker and interface scaling presets (`100%` up to `150%`) with automatic geometry adjustments, optimized Treeview row heights, and persistent accessibility settings.
+*   **Quality of Life Polish**: Added quick-clear search button (`✕`), double-click mod card toggle, keyboard navigation (`▲`/`▼`), keyboard metadata shortcuts (`Ctrl+S`/`Enter`), "✔️ Saved!" visual flash, dynamic list counter, 1-click "Open Folder" in Save Manager, and single-mod zip export.
 
 ---
 
@@ -74,5 +76,13 @@ This document contains a running log of all changes made since the official rele
 *   Added informative feedback when clicking load order priority buttons in Standard (Direct Staging) mode.
 *   Added dynamic Python executable discovery (`shutil.which`) for plugin script execution when running as a standalone compiled executable.
 *   Added trailing separator to extraction destination paths for WinRAR/UnRAR compatibility across all WinRAR versions.
+*   Fixed `AttributeError` on modpack import profile creation by referencing `self.config['profiles']` and updating the profile dropdown.
+*   Fixed mousewheel scrolling over mod cards and child widgets by propagating `<MouseWheel>` events smoothly to the canvas.
+*   Upgraded mod visual preview and "Open Folder" resolution (`get_mod_source_dir`) to check disabled, Fahrenheit, and active directories seamlessly.
+*   Added `Ctrl+F` global shortcut to jump directly to mod search and `Escape` to clear search and refocus mod cards.
+*   Implemented **Single Mod Standalone Zip Exporter (`.zip`)**: 1-click packaging from the mod card context menu or details panel into a distribution-ready archive for Nexus Mods with anti-nesting structure normalization, clean metadata manifest generation, cover image inclusion, and 1-click reveal in Windows File Explorer.
+*   Implemented **Custom Font & UI Scale Accessibility Switcher (Adaptive Display Engine)**: Added live UI scaling (`100%`, `110%`, `120%`, `130%`, `150%`) and font family customization (`Segoe UI`, `Arial`, `Consolas`, `Verdana`, `Calibri`) in Settings -> Appearance & Display Settings. Features a universal recursive widget font update engine that dynamically recalculates font sizes and font families across 100% of all buttons, static labels, title headers, entries, treeviews, notebook tabs, and mod cards in real time with persistent configuration.
+*   Implemented **Interactive Character Dashboard Profiles & Ambient Backdrop Engine**: Added a dedicated Persona selector in Settings supporting iconic characters (*Tidus*, *Yuna*, *Auron*, *Rikku*, *Lulu*, *Paine*, *Wakka*, *Kimahri*). Selecting a persona shifts the color palette, updates the sidebar logo crest (e.g. `🎮 FFX • 🗡️ AURON`), displays their signature quote in the sidebar footer, and seamlessly renders an anchored, semi-transparent watermark backdrop from `assets/characters/character_<name>.png` that stays fixed to the bottom-right corner during window resizing.
+*   Implemented **Semantic Version Checker in Toolkit Plugin**: Added `parse_version` helper to normalize version strings (handling `v` prefixes and multi-part numerical schemas like `1.0.0.0` vs `v1.1.0`) ensuring GitHub update detection checks evaluate strictly higher versions.
 
 

@@ -8,11 +8,11 @@
     "ai": "C:\\Users\\jonat\\Desktop\\Modding\\Final Fantasy X&X2 Modding\\Custom FFX Tools\\FFX-AI-Tool\\FFX_AI_Tool.py"
   },
   "versions": {
-    "text": "1.0.0.0",
+    "text": "1.1.0.0",
     "sphere": "1.0.0.0",
     "shop": "1.0.0.0",
     "phyre": "2.2.0.0",
     "audio": "1.0.0.0",
-    "ai": "1.0.0.0"
+    "ai": "1.1.0.0"
   }
 }
