@@ -6,7 +6,7 @@
     "version": "1.2",
     "description": "Custom achievements tracker and notifications overlay hud using RAM memory scanning.",
     "icon": "🏆",
-    "download_url": "https://raw.githubusercontent.com/odinj2010/FFX-Mod-Manager/main/zips/achievements.zip"
+    "download_url": "https://raw.githubusercontent.com/NfgOdin/Spira_Mod_Manager/main/zips/achievements.zip"
   },
   {
     "id": "toolkit",
@@ -15,6 +15,6 @@
     "version": "1.0",
     "description": "Quick-launcher, path configurations, and download helpers for FFX modding utilities and custom tools.",
     "icon": "🛠️",
-    "download_url": "https://raw.githubusercontent.com/odinj2010/FFX-Mod-Manager/main/zips/tools.zip"
+    "download_url": "https://raw.githubusercontent.com/NfgOdin/Spira_Mod_Manager/main/zips/tools.zip"
   }
 ]

@@ -47,7 +47,7 @@ class ToolkitTab:
                 "script": "FFX_Text_Tool.py",
                 "exe": "FFX_Text_Tool.exe",
                 "desc": "Browse, search, edit, and re-import text strings from the game script.",
-                "download_url": "https://github.com/odinj2010/FFX_Text_Tool/releases/latest/download/FFX_Text_Tool.zip"
+                "download_url": "https://github.com/NfgOdin/FFX_Text_Tool/releases/latest/download/FFX_Text_Tool.zip"
             },
             "sphere": {
                 "name": "FFX Sphere Grid Tool",
@@ -55,7 +55,7 @@ class ToolkitTab:
                 "script": "FFX_Sphere_Grid_Tool.py",
                 "exe": "FFX_Sphere_Grid_Tool.exe",
                 "desc": "Edit sphere grid node properties, item paths, and character starting positions.",
-                "download_url": "https://github.com/odinj2010/FFX_Sphere_Grid_Tool/releases/latest/download/FFX_Sphere_Grid_Tool.zip"
+                "download_url": "https://github.com/NfgOdin/FFX_Sphere_Grid_Tool/releases/latest/download/FFX_Sphere_Grid_Tool.zip"
             },
             "shop": {
                 "name": "FFX Shop Tool",
@@ -63,7 +63,7 @@ class ToolkitTab:
                 "script": "FFX_Shop_Tool.py",
                 "exe": "FFX_Shop_Tool.exe",
                 "desc": "Modify shop inventories, prices, items, and unlock triggers.",
-                "download_url": "https://github.com/odinj2010/FFX_Shop_Tool/releases/latest/download/FFX_Shop_Tool.zip"
+                "download_url": "https://github.com/NfgOdin/FFX_Shop_Tool/releases/latest/download/FFX_Shop_Tool.zip"
             },
             "phyre": {
                 "name": "FFX Phyre Tool",
@@ -71,7 +71,7 @@ class ToolkitTab:
                 "script": "FFX_Phyre_Tool.py",
                 "exe": "FFX_Phyre_Tool.exe",
                 "desc": "Extract and re-pack 3D models and Phyre engine textures.",
-                "download_url": "https://github.com/odinj2010/FFX-Phyre-Tool/releases/latest/download/FFX_Phyre_Tool.zip"
+                "download_url": "https://github.com/NfgOdin/FFX-Phyre-Tool/releases/latest/download/FFX_Phyre_Tool.zip"
             },
             "audio": {
                 "name": "FFX Audio Tool",
@@ -79,7 +79,7 @@ class ToolkitTab:
                 "script": "FFX_Audio_Tool.py",
                 "exe": "FFX_Audio_Tool.exe",
                 "desc": "Convert, replace, and edit game voice lines, sound effects, and music.",
-                "download_url": "https://github.com/odinj2010/FFX_Audio_Tool/releases/latest/download/FFX_Audio_Tool.zip"
+                "download_url": "https://github.com/NfgOdin/FFX_Audio_Tool/releases/latest/download/FFX_Audio_Tool.zip"
             },
             "ai": {
                 "name": "FFX AI Tool",
@@ -87,7 +87,7 @@ class ToolkitTab:
                 "script": "FFX_AI_Tool.py",
                 "exe": "FFX_AI_Tool.exe",
                 "desc": "Edit enemy AI scripts, combat routines, and behaviors.",
-                "download_url": "https://github.com/odinj2010/FFX_AI_Tool/releases/latest/download/FFX_AI_Tool.zip"
+                "download_url": "https://github.com/NfgOdin/FFX_AI_Tool/releases/latest/download/FFX_AI_Tool.zip"
             }
         }
         
@@ -348,7 +348,7 @@ class ToolkitTab:
                 continue
                 
             try:
-                url = f"https://api.github.com/repos/odinj2010/{tool['folder']}/releases/latest"
+                url = f"https://api.github.com/repos/NfgOdin/{tool['folder']}/releases/latest"
                 req = urllib.request.Request(url, headers={"User-Agent": "SpiraMM-Toolkit-Plugin"})
                 with urllib.request.urlopen(req, timeout=5) as response:
                     data = json.loads(response.read().decode())
@@ -613,7 +613,7 @@ class ToolkitTab:
         
         latest_tag = "v1.0.0"
         try:
-            api_url = f"https://api.github.com/repos/odinj2010/{tool['folder']}/releases/latest"
+            api_url = f"https://api.github.com/repos/NfgOdin/{tool['folder']}/releases/latest"
             req = urllib.request.Request(api_url, headers={"User-Agent": "SpiraMM-Toolkit-Plugin"})
             with urllib.request.urlopen(req, timeout=5) as response:
                 data = json.loads(response.read().decode())

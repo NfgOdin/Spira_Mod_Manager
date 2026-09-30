@@ -7227,7 +7227,7 @@ class FFXModManagerGUI:
         import urllib.request
         try:
             req = urllib.request.Request(
-                "https://raw.githubusercontent.com/odinj2010/FFX-Mod-Manager/main/plugins.json",
+                "https://raw.githubusercontent.com/NfgOdin/Spira_Mod_Manager/main/plugins.json",
                 headers={'User-Agent': 'Mozilla/5.0'}
             )
             with urllib.request.urlopen(req, timeout=3.0) as response:
@@ -8113,14 +8113,14 @@ class FFXModManagerGUI:
         
         try:
             req = urllib.request.Request(
-                "https://api.github.com/repos/odinj2010/FFX-Mod-Manager/releases/latest",
+                "https://api.github.com/repos/NfgOdin/Spira_Mod_Manager/releases/latest",
                 headers={'User-Agent': 'SpiraMM-Update-Checker'}
             )
             with urllib.request.urlopen(req, timeout=4.0) as response:
                 data = json.loads(response.read().decode('utf-8'))
                 raw_tag = data.get("tag_name", "").strip()
                 tag_name = raw_tag.upper().lstrip("V").lstrip(".")
-                html_url = data.get("html_url", "https://github.com/odinj2010/FFX-Mod-Manager/releases")
+                html_url = data.get("html_url", "https://github.com/NfgOdin/Spira_Mod_Manager/releases")
                 
                 if not tag_name:
                     return
@@ -9515,7 +9515,7 @@ while True:
         btn_changelog.pack(side="left", padx=(0, 6))
         self.bind_hover(btn_changelog)
         
-        btn_github = tk.Button(links_frame, text="🌐 GitHub Repository", command=lambda: webbrowser.open("https://github.com/odinj2010/FFX-Mod-Manager"), bg=self.bg_color, fg=self.text_color, font=("Segoe UI", 8, "bold"), relief="flat", activebackground=self.border_color, padx=10, pady=3)
+        btn_github = tk.Button(links_frame, text="🌐 GitHub Repository", command=lambda: webbrowser.open("https://github.com/NfgOdin/Spira_Mod_Manager"), bg=self.bg_color, fg=self.text_color, font=("Segoe UI", 8, "bold"), relief="flat", activebackground=self.border_color, padx=10, pady=3)
         btn_github.pack(side="left", padx=6)
         self.bind_hover(btn_github)
         

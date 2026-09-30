@@ -8,7 +8,7 @@ A clean, fast, and secure standalone mod manager for **Final Fantasy X / X-2 HD 
 
 If you are a player looking to download the latest version, click the link below to get the ready-to-use mod manager file immediately:
 
-### [👉 Click here to download the Newest Stable Release (v3.3.1) 👈](https://github.com/odinj2010/FFX-Mod-Manager/releases/download/v3.3.1/SpiraMM.rar)
+### [👉 Click here to download the Newest Stable Release (v3.3.2) 👈](https://github.com/NfgOdin/Spira_Mod_Manager/releases/download/v3.3.2/SpiraMM.rar)
 
 ### 🚀 Easy Installation Steps
 1. **Download** the archive using the link above.
@@ -17,14 +17,28 @@ If you are a player looking to download the latest version, click the link below
 
 ---
 
-## ⚡ New in v3.3.1
+## ⚡ New in v3.3.2
 
-* **Native .7z Archive Support**: Drag-and-drop or import `.7z` mod archives directly into the manager. Full support across single and bulk import dialogs, routing extraction through 7-Zip, WinRAR, or Windows native `tar` engines.
-* **Executable Version Metadata Alignment**: Synchronized Windows compilation build metadata (`spiramm_version.txt`) to report `v3.3.1.0` in the executable's properties details window.
+* **Spira Modpack Engine (`.spirapack` / `.zip`)**: Package collections of installed mods, metadata, descriptions, and Fahrenheit load order into a single portable distribution archive with a multi-threaded exporter dialog and 1-click import preview modal.
+* **Multi-Tier LIFO Conflict Registry (`conflict_registry.json`)**: Built a robust collision stack engine ensuring vanilla game files are never overwritten or corrupted, and previous mod layers automatically cascade back when disabling mods.
+* **Steam Deck & Linux/Proton Auto-Detection**: Native auto-discovery of Steam game libraries and virtualized Proton Documents save folders (`compatdata/359870/pfx/...`) for zero-configuration modding on Steam Deck and Linux.
+* **Universal Preview Image & Full-Resolution Zoom Viewer**: Integrated multi-image gallery support across PNG, JPG, JPEG, WEBP, BMP (`preview1`–`5`, `cover1`–`5`, `screenshot1`–`5`) with responsive 3-zone preview clicking and full-resolution modal pan/zoom.
+* **Official Nexus Mods Categories & Dynamic Badges**: Fully updated category normalization across all official Nexus categories for FFX & FFX-2 HD Remaster with vibrant high-contrast badges on mod cards.
+* **Instant Startup & High-Performance Conflict Engine**: In-memory active file indexing reduces conflict scanning from $O(N \times M)$ disk operations to $O(1)$ in-memory lookups, reducing latency on 10,000+ file mods to under 2ms, with instant metadata startup sizing.
+* **Mod List "Sort By" Engine**: Added 1-click sorting for *Name (A–Z / Z–A)*, *Status (Enabled First)*, *Size (Largest First)*, *Category*, and *Default Order*.
+* **Single Mod Standalone Zip Exporter (`.zip`)**: 1-click packaging from the mod card context menu or details panel into clean, distribution-ready archives with normalized relative paths, cover art, and metadata.
+* **Adaptive Display Engine & UI Scaling**: Live interface scaling presets (`100%` up to `150%`) and real-time font family customization (`Segoe UI`, `Arial`, `Consolas`, `Verdana`, `Calibri`) with dynamic geometry recalculation across all widgets.
+* **Interactive Character Dashboard Profiles & Ambient Backdrops**: Bespoke character personas (*Tidus*, *Yuna*, *Auron*, *Rikku*, *Lulu*, *Paine*, *Wakka*, *Kimahri*) coordinating color palettes, crest emblems, ambient quotes, and anchored semi-transparent character watermarks.
+* **Aeon Stat Uncapper Plugin**: Built-in memory hook plugin removing the 9,999 HP and 999 MP scaling caps between Yuna and her Aeons, scaling continuously up to 99,999 HP and 9,999 MP.
+* **Developer Toolkit Semantic Versioning**: Added normalized semantic version parsing and comparison to verify remote GitHub releases accurately across varying version schemas.
+* **Quality of Life Polish**: Quick-clear search button (`✕`), double-click mod card toggle, keyboard navigation (arrow keys), keyboard save shortcuts (`Ctrl+S` / `Enter`), dynamic list counter, and 1-click "Open Folder" in Save Manager.
 
 ---
 
 ## 🌟 Core Features
+
+* **Native .7z Archive Support**: Drag-and-drop or import `.7z` mod archives directly into the manager. Full support across single and bulk import dialogs, routing extraction through 7-Zip, WinRAR, or Windows native `tar` engines.
+* **Executable Version Metadata Alignment**: Synchronized Windows compilation build metadata (`spiramm_version.txt`) to report `v3.3.2.0` in the executable's properties details window.
 
 * **Nexus Mods Integration & Update Checker**: Configure a personal Nexus Mods API Key securely in Settings to validate connection, check installed mods for updates asynchronously (background threaded), and show visual update badges linking to download pages.
 * **Mod Card Context Menu**: Right-click mod cards to access quick options (Edit Metadata, Check Update, Visit Nexus page, Enable/Disable, Delete).
