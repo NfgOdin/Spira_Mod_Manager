@@ -1,9 +1,9 @@
 {
-  "name": "Aeon Stat Uncapper",
+  "name": "Aeon Stat Uncapper *WIP*",
   "icon": "🐉",
   "version": "1.0.0",
   "creator": "NfgOdin",
   "entry_point": "gui.AeonUncapTab",
   "tracker_script": "tracker.py",
-  "description": "Removes the hard 9,999 HP and 999 MP scaling caps between Yuna and her Aeons. Aeons will continuously scale with Yuna's stats up to 99,999 HP and 9,999 MP."
+  "description": "[Untested / WIP] Removes the hard 9,999 HP and 999 MP scaling caps between Yuna and her Aeons. Aeons will continuously scale with Yuna's stats up to 99,999 HP and 9,999 MP."
 }

@@ -67,7 +67,7 @@ class AeonUncapTab:
         # Header
         self.lbl_title = tk.Label(
             self.parent,
-            text="🐉 Aeon Stat Uncapper",
+            text="🐉 Aeon Stat Uncapper *WIP*",
             font=("Segoe UI", 14, "bold"),
             fg=self.accent_color,
             bg=self.bg_color
@@ -77,7 +77,7 @@ class AeonUncapTab:
 
         self.lbl_desc = tk.Label(
             self.parent,
-            text="Unlocks Yuna's stat evaluation cap when deriving Aeon power. In vanilla FFX, Aeons stop scaling once Yuna reaches 9,999 HP and 999 MP. With this plugin active, Aeons continue scaling with Yuna up to 99,999 HP and 9,999 MP.",
+            text="⚠️ [Untested / Work in Progress]\nUnlocks Yuna's stat evaluation cap when deriving Aeon power. In vanilla FFX, Aeons stop scaling once Yuna reaches 9,999 HP and 999 MP. With this plugin active, Aeons continue scaling with Yuna up to 99,999 HP and 9,999 MP.",
             font=("Segoe UI", 10),
             fg=self.text_color,
             bg=self.bg_color,

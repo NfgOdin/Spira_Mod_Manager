@@ -16,5 +16,14 @@
     "description": "Quick-launcher, path configurations, and download helpers for FFX modding utilities and custom tools.",
     "icon": "🛠️",
     "download_url": "https://raw.githubusercontent.com/NfgOdin/Spira_Mod_Manager/main/zips/tools.zip"
+  },
+  {
+    "id": "aeon_uncap",
+    "name": "Aeon Stat Uncapper *WIP*",
+    "creator": "NfgOdin",
+    "version": "1.0.0",
+    "description": "[Untested / WIP] Removes the hard 9,999 HP and 999 MP scaling caps between Yuna and her Aeons. Aeons will continuously scale with Yuna's stats up to 99,999 HP and 9,999 MP.",
+    "icon": "🐉",
+    "download_url": "https://raw.githubusercontent.com/NfgOdin/Spira_Mod_Manager/main/zips/aeon_uncap.zip"
   }
 ]
